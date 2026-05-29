@@ -11,6 +11,7 @@ interface PanelState {
 interface UIState {
   sidebar: SidebarState;
   sidebarMobileOpen: boolean;
+  commandBarOpen: boolean;
   panels: PanelState[];
   activeModal: string | null;
   activeSheet: string | null;
@@ -18,6 +19,8 @@ interface UIState {
   setSidebar: (state: SidebarState) => void;
   toggleSidebar: () => void;
   setSidebarMobileOpen: (open: boolean) => void;
+  openCommandBar: () => void;
+  closeCommandBar: () => void;
   togglePanel: (id: string) => void;
   setPanelSize: (id: string, size: number) => void;
   openModal: (id: string) => void;
@@ -29,6 +32,7 @@ interface UIState {
 export const useUIStore = create<UIState>()((set) => ({
   sidebar: "expanded",
   sidebarMobileOpen: false,
+  commandBarOpen: false,
   panels: [],
   activeModal: null,
   activeSheet: null,
@@ -39,6 +43,8 @@ export const useUIStore = create<UIState>()((set) => ({
       sidebar: prev.sidebar === "expanded" ? "collapsed" : "expanded",
     })),
   setSidebarMobileOpen: (open) => set({ sidebarMobileOpen: open }),
+  openCommandBar: () => set({ commandBarOpen: true }),
+  closeCommandBar: () => set({ commandBarOpen: false }),
 
   togglePanel: (id) =>
     set((prev) => {

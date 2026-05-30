@@ -7,7 +7,6 @@ import { NavItem } from "./nav-item";
 import {
   LayoutDashboard,
   Activity,
-  Search,
   Box,
   Cable,
   Eye,
@@ -17,16 +16,29 @@ import {
   PanelLeft,
   Cpu,
   X,
+  Bot,
+  Route,
+  GitBranch,
+  Layers,
+  Workflow,
 } from "lucide-react";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/system-health", label: "System Health", icon: Activity },
-  { href: "/tracing", label: "Request Tracing", icon: Search },
-  { href: "/models", label: "Model Registry", icon: Box },
-  { href: "/providers", label: "Providers", icon: Cable },
-  { href: "/observability", label: "Observability", icon: Eye },
-  { href: "/settings", label: "Settings", icon: Settings },
+const navGroups: ({ type: "section"; label: string } | { type: "link"; href: string; label: string; icon: typeof Cpu })[] = [
+  { type: "link", href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { type: "link", href: "/system-health", label: "System Health", icon: Activity },
+  { type: "section", label: "Platform" },
+  { type: "link", href: "/models", label: "Model Registry", icon: Box },
+  { type: "link", href: "/providers", label: "Providers", icon: Cable },
+  { type: "link", href: "/observability", label: "Observability", icon: Eye },
+  { type: "section", label: "Agents" },
+  { type: "link", href: "/agents", label: "Agent Runs", icon: Workflow },
+  { type: "section", label: "AI Gateway" },
+  { type: "link", href: "/gateway/playground", label: "Playground", icon: Bot },
+  { type: "link", href: "/gateway/prompts", label: "Prompt Registry", icon: Layers },
+  { type: "link", href: "/gateway/routing", label: "Routing Rules", icon: Route },
+  { type: "link", href: "/gateway/traces", label: "Request Traces", icon: GitBranch },
+  { type: "section", label: "Account" },
+  { type: "link", href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -64,13 +76,23 @@ export function Sidebar() {
           </button>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-          {navItems.map((item) => (
-            <NavItem
-              key={item.href}
-              {...item}
-              onClick={() => setSidebarMobileOpen(false)}
-            />
-          ))}
+          {navGroups.map((item) =>
+            item.type === "section" ? (
+              <div key={item.label} className="px-3 pt-4 pb-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                  {item.label}
+                </span>
+              </div>
+            ) : (
+              <NavItem
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                onClick={() => setSidebarMobileOpen(false)}
+              />
+            ),
+          )}
         </nav>
       </aside>
 
@@ -120,13 +142,25 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-2">
-          {navItems.map((item) => (
-            <NavItem
-              key={item.href}
-              {...item}
-              isCollapsed={isCollapsed}
-            />
-          ))}
+          {navGroups.map((item) =>
+            item.type === "section" ? (
+              !isCollapsed && (
+                <div key={item.label} className="px-3 pt-4 pb-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/40">
+                    {item.label}
+                  </span>
+                </div>
+              )
+            ) : (
+              <NavItem
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                isCollapsed={isCollapsed}
+              />
+            ),
+          )}
         </nav>
 
         {/* Collapse/Expand button at bottom */}

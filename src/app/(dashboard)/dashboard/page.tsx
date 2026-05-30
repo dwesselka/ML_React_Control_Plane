@@ -1,5 +1,6 @@
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { DashboardCards } from "@/components/dashboard/dashboard-cards";
+import { DashboardCharts } from "@/components/dashboard/dashboard-charts";
 import { WorkspaceContainer } from "@/components/layout/workspace-container";
 
 export default function DashboardPage() {
@@ -11,6 +12,7 @@ export default function DashboardPage() {
           text="Overview of your ML platform"
         />
         <DashboardCards />
+        <DashboardCharts />
       </div>
     </WorkspaceContainer>
   );

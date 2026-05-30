@@ -12,6 +12,14 @@ export const ROUTES = {
   pipelines: "/pipelines",
   settings: "/settings",
   login: "/login",
+  agents: "/agents",
+  gateway: {
+    root: "/gateway",
+    playground: "/gateway/playground",
+    prompts: "/gateway/prompts",
+    routing: "/gateway/routing",
+    traces: "/gateway/traces",
+  },
 } as const;
 
 export const QUERY_KEYS = {

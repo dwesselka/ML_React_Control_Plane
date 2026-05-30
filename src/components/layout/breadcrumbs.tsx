@@ -8,11 +8,16 @@ import { ChevronRight, Cpu } from "lucide-react";
 const routeLabels: Record<string, string> = {
   dashboard: "Dashboard",
   "system-health": "System Health",
-  tracing: "Request Tracing",
   models: "Model Registry",
   providers: "Providers",
   observability: "Observability",
   settings: "Settings",
+  gateway: "AI Gateway",
+  playground: "Playground",
+  prompts: "Prompt Registry",
+  routing: "Routing Rules",
+  traces: "Request Traces",
+  agents: "Agent Runs",
 };
 
 export function Breadcrumbs() {

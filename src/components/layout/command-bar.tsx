@@ -8,11 +8,15 @@ import { useUIStore } from "@/stores/ui-store";
 
 const commands = [
   { label: "Go to Dashboard", href: "/dashboard" },
-  { label: "Go to Model Registry", href: "/models" },
   { label: "Go to System Health", href: "/system-health" },
-  { label: "Go to Request Tracing", href: "/tracing" },
+  { label: "Go to Model Registry", href: "/models" },
   { label: "Go to Providers", href: "/providers" },
   { label: "Go to Observability", href: "/observability" },
+  { label: "Go to Agent Runs", href: "/agents" },
+  { label: "Go to AI Playground", href: "/gateway/playground" },
+  { label: "Go to Prompt Registry", href: "/gateway/prompts" },
+  { label: "Go to Routing Rules", href: "/gateway/routing" },
+  { label: "Go to Request Traces", href: "/gateway/traces" },
   { label: "Go to Settings", href: "/settings" },
 ];
 

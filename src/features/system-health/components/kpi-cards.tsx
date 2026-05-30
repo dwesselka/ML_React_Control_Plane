@@ -39,7 +39,11 @@ const trendColors = {
 
 function KpiCard({ kpi }: { kpi: KpiMetric }) {
   return (
-    <div className="group rounded-xl border bg-card p-5 transition-all duration-200 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5">
+    <div
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.preventDefault(); }}
+      className="group rounded-xl border bg-card p-5 transition-all duration-200 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {kpi.label}

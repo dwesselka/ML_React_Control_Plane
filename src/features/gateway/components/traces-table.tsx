@@ -30,7 +30,9 @@ export function TracesTable({ traces }: TracesTableProps) {
           <div key={trace.id} className="rounded-xl border bg-card transition-all hover:border-primary/20">
             <button
               onClick={() => setExpanded(isExpanded ? null : trace.id)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpanded(isExpanded ? null : trace.id); } }}
               className="flex w-full items-center gap-4 p-4 text-left"
+              aria-expanded={isExpanded}
             >
               <div className={cn("h-2 w-2 shrink-0 rounded-full", s.dot)} />
               <div className="flex-1 min-w-0">

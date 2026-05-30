@@ -8,6 +8,8 @@ import {
   ChevronsUpDown,
   ChevronLeft,
   ChevronRight,
+  Search,
+  Download,
 } from "lucide-react";
 
 type SortDirection = "asc" | "desc" | null;
@@ -44,6 +46,11 @@ interface DataTableProps<T> {
   isLoading?: boolean;
   emptyMessage?: string;
   className?: string;
+  searchable?: boolean;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  exportLabel?: string;
+  onExport?: () => void;
 }
 
 function DataTable<T>({
@@ -63,6 +70,11 @@ function DataTable<T>({
   isLoading,
   emptyMessage = "No data found",
   className,
+  searchable,
+  searchValue,
+  onSearchChange,
+  exportLabel,
+  onExport,
 }: DataTableProps<T>) {
   const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set());
 
@@ -103,6 +115,30 @@ function DataTable<T>({
 
   return (
     <div className={cn("space-y-3", className)}>
+      {(searchable || onExport) && (
+        <div className="flex items-center gap-2">
+          {searchable && (
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={searchValue ?? ""}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                placeholder="Search..."
+                className="w-full rounded-lg border bg-background py-2 pl-9 pr-3 text-sm placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </div>
+          )}
+          {onExport && (
+            <button
+              onClick={onExport}
+              className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Download className="h-3.5 w-3.5" />
+              {exportLabel ?? "Export CSV"}
+            </button>
+          )}
+        </div>
+      )}
       <div className="overflow-hidden rounded-xl border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full">

@@ -8,8 +8,17 @@ import { PlaygroundForm } from "@/features/gateway/components/playground-form";
 import { RoutingResult } from "@/features/gateway/components/routing-result";
 import { mockPlaygroundResponse } from "@/features/gateway/mocks";
 import type { RouterStrategy, PlaygroundResponse } from "@/features/gateway/types";
-import { Sparkles, History } from "lucide-react";
+import { History, XCircle, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const STAGES = [
+  { key: "analyzing", label: "Analyzing request" },
+  { key: "routing", label: "Routing to provider" },
+  { key: "generating", label: "Generating response" },
+] as const;
+
+type Stage = (typeof STAGES)[number]["key"];
 
 function PlaygroundSkeleton() {
   return (
@@ -38,7 +47,7 @@ function PlaygroundSkeleton() {
           <div className="rounded-xl border bg-card p-4 space-y-2">
             <Skeleton className="h-4 w-16" />
             <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-4/5" />
+            <Skeleton className="h-3 w/5" />
           </div>
         </aside>
       </div>
@@ -50,25 +59,79 @@ export default function PlaygroundPage() {
   const [mounted, setMounted] = React.useState(false);
   const [response, setResponse] = React.useState<PlaygroundResponse | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [cancelled, setCancelled] = React.useState(false);
+  const [stage, setStage] = React.useState<Stage | null>(null);
+  const [streamingOutput, setStreamingOutput] = React.useState("");
   const [history, setHistory] = React.useState<{ prompt: string; id: string }[]>([]);
+  const cancelRef = React.useRef(false);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
+  const cleanup = React.useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    timeoutRef.current = null;
+    intervalRef.current = null;
+  }, []);
+
+  const handleCancel = React.useCallback(() => {
+    cancelRef.current = true;
+    cleanup();
+    setLoading(false);
+    setStage(null);
+    setCancelled(true);
+    toast.error("Request cancelled");
+  }, [cleanup]);
+
   const handleSimulate = React.useCallback((prompt: string, _strategy: RouterStrategy) => {
+    cancelRef.current = false;
+    setCancelled(false);
     setLoading(true);
     setResponse(null);
+    setStreamingOutput("");
+    cleanup();
     toast.info("Routing request...");
 
     setTimeout(() => {
+      if (cancelRef.current) return;
+      setStage("analyzing");
+    }, 50);
+
+    setTimeout(() => {
+      if (cancelRef.current) return;
+      setStage("routing");
+    }, 400);
+
+    setTimeout(() => {
+      if (cancelRef.current) return;
+      setStage("generating");
+
       const result = mockPlaygroundResponse(prompt);
-      setResponse(result);
-      setLoading(false);
-      toast.success(`Response received from ${result.decision.selectedProvider} (${result.analysis.estimatedLatency}ms)`);
-      setHistory((prev) => [{ prompt, id: result.id }, ...prev].slice(0, 10));
-    }, 1200);
-  }, []);
+      const fullOutput = result.output;
+      let idx = 0;
+
+      intervalRef.current = setInterval(() => {
+        if (cancelRef.current) { cleanup(); return; }
+        idx += 3;
+        if (idx >= fullOutput.length) {
+          idx = fullOutput.length;
+          cleanup();
+          setStreamingOutput(fullOutput);
+          setLoading(false);
+          setStage(null);
+          setResponse(result);
+          toast.success(`Response received from ${result.decision.selectedProvider} (${result.analysis.estimatedLatency}ms)`);
+          setHistory((prev) => [{ prompt, id: result.id }, ...prev].slice(0, 10));
+          return;
+        }
+        setStreamingOutput(fullOutput.slice(0, idx));
+      }, 30);
+    }, 800);
+  }, [cleanup]);
 
   if (!mounted) {
     return (
@@ -91,11 +154,55 @@ export default function PlaygroundPage() {
             <PlaygroundForm onSimulate={handleSimulate} loading={loading} />
 
             {loading && (
-              <div className="flex items-center justify-center rounded-xl border bg-card p-12">
-                <div className="flex flex-col items-center gap-3">
-                  <Sparkles className="h-8 w-8 text-primary animate-spin" />
-                  <p className="text-sm text-muted-foreground">Analyzing request and simulating routing...</p>
+              <div className="rounded-xl border bg-card p-6 space-y-5">
+                <div className="space-y-3">
+                  {STAGES.map((s) => {
+                    const isActive = stage === s.key;
+                    const isDone =
+                      (stage === "routing" && s.key === "analyzing") ||
+                      (stage === "generating" && (s.key === "analyzing" || s.key === "routing"));
+                    return (
+                      <div key={s.key} className="flex items-center gap-3">
+                        {isDone ? (
+                          <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                        ) : isActive ? (
+                          <Loader2 className="h-4 w-4 text-primary animate-spin shrink-0" />
+                        ) : (
+                          <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+                        )}
+                        <span className={cn(
+                          "text-sm",
+                          isDone ? "text-muted-foreground" : isActive ? "text-foreground font-medium" : "text-muted-foreground/50",
+                        )}>
+                          {s.label}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
+
+                {stage === "generating" && streamingOutput && (
+                  <div className="rounded-lg bg-muted p-4">
+                    <pre className="text-xs leading-relaxed whitespace-pre-wrap">
+                      <code>{streamingOutput}</code>
+                      <span className="inline-block w-1.5 h-4 bg-primary ml-0.5 animate-pulse" />
+                    </pre>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleCancel}
+                  className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  <XCircle className="h-3.5 w-3.5" />
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {cancelled && !loading && !response && (
+              <div className="flex items-center justify-center rounded-xl border border-dashed bg-card p-12">
+                <p className="text-sm text-muted-foreground">Request was cancelled. Try again with a new prompt.</p>
               </div>
             )}
 

@@ -51,16 +51,13 @@ export default function RoutingRulesPage() {
 
   const handleToggle = React.useCallback((id: string) => {
     setRules((prev) =>
-      prev.map((r) => {
-        if (r.id === id) {
-          const next = { ...r, isActive: !r.isActive };
-          toast.success(`Rule "${r.name}" ${next.isActive ? "activated" : "deactivated"}`);
-          return next;
-        }
-        return r;
-      }),
+      prev.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r)),
     );
-  }, []);
+    const rule = rules.find((r) => r.id === id);
+    if (rule) {
+      toast.success(`Rule "${rule.name}" ${!rule.isActive ? "activated" : "deactivated"}`);
+    }
+  }, [rules]);
 
   if (!mounted) {
     return (

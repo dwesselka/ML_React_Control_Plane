@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ThemeProvider } from "./theme-provider";
 import { QueryProvider } from "./query-provider";
+import { OnlineStatusProvider } from "./online-status";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <QueryProvider>{children}</QueryProvider>
+      <QueryProvider>
+        <OnlineStatusProvider>{children}</OnlineStatusProvider>
+      </QueryProvider>
     </ThemeProvider>
   );
 }

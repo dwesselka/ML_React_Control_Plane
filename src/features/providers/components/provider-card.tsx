@@ -51,8 +51,10 @@ interface ProviderCardProps {
 export function ProviderCard({ provider }: ProviderCardProps) {
   return (
     <div
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.preventDefault(); }}
       className={cn(
-        "group relative rounded-xl border bg-card p-5 transition-all duration-200",
+        "group relative rounded-xl border bg-card p-5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         "hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5",
       )}
     >

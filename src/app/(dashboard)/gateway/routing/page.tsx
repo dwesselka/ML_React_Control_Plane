@@ -8,6 +8,7 @@ import { RoutingRulesTable } from "@/features/gateway/components/routing-rules-t
 import { mockRoutingRules } from "@/features/gateway/mocks";
 import type { RoutingRule } from "@/features/gateway/types";
 import { Plus, Info } from "lucide-react";
+import { toast } from "sonner";
 
 function RoutingSkeleton() {
   return (
@@ -50,7 +51,14 @@ export default function RoutingRulesPage() {
 
   const handleToggle = React.useCallback((id: string) => {
     setRules((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, isActive: !r.isActive } : r)),
+      prev.map((r) => {
+        if (r.id === id) {
+          const next = { ...r, isActive: !r.isActive };
+          toast.success(`Rule "${r.name}" ${next.isActive ? "activated" : "deactivated"}`);
+          return next;
+        }
+        return r;
+      }),
     );
   }, []);
 
@@ -69,7 +77,10 @@ export default function RoutingRulesPage() {
           heading="Routing Rules"
           text="Configure how requests are distributed across AI providers"
         >
-          <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+          <button
+            onClick={() => toast.success("New rule dialog opened (simulated)")}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
             <Plus className="h-3.5 w-3.5" />
             New Rule
           </button>

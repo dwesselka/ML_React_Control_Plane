@@ -9,6 +9,7 @@ import { RoutingResult } from "@/features/gateway/components/routing-result";
 import { mockPlaygroundResponse } from "@/features/gateway/mocks";
 import type { RouterStrategy, PlaygroundResponse } from "@/features/gateway/types";
 import { Sparkles, History } from "lucide-react";
+import { toast } from "sonner";
 
 function PlaygroundSkeleton() {
   return (
@@ -58,11 +59,13 @@ export default function PlaygroundPage() {
   const handleSimulate = React.useCallback((prompt: string, _strategy: RouterStrategy) => {
     setLoading(true);
     setResponse(null);
+    toast.info("Routing request...");
 
     setTimeout(() => {
       const result = mockPlaygroundResponse(prompt);
       setResponse(result);
       setLoading(false);
+      toast.success(`Response received from ${result.decision.selectedProvider} (${result.analysis.estimatedLatency}ms)`);
       setHistory((prev) => [{ prompt, id: result.id }, ...prev].slice(0, 10));
     }, 1200);
   }, []);

@@ -9,6 +9,7 @@ import { PromptDetail } from "@/features/prompts/components/prompt-detail";
 import { mockPrompts } from "@/features/prompts/mocks";
 import type { Prompt } from "@/features/prompts/types";
 import { Search, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 function PromptsSkeleton() {
   return (
@@ -106,7 +107,10 @@ export default function PromptRegistryPage() {
           heading="Prompt Registry"
           text="Manage and version your AI system prompts across use cases"
         >
-          <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+          <button
+            onClick={() => toast.success("Prompt creation dialog opened (simulated)")}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
             <Plus className="h-3.5 w-3.5" />
             New Prompt
           </button>

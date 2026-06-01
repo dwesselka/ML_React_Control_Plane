@@ -8,9 +8,10 @@ import { PlaygroundForm } from "@/features/gateway/components/playground-form";
 import { RoutingResult } from "@/features/gateway/components/routing-result";
 import { mockPlaygroundResponse } from "@/features/gateway/mocks";
 import type { RouterStrategy, PlaygroundResponse } from "@/features/gateway/types";
-import { History, XCircle, Loader2, CheckCircle2 } from "lucide-react";
+import { History, XCircle, Loader2, CheckCircle2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 const STAGES = [
   { key: "analyzing", label: "Analyzing request" },
@@ -62,7 +63,7 @@ export default function PlaygroundPage() {
   const [cancelled, setCancelled] = React.useState(false);
   const [stage, setStage] = React.useState<Stage | null>(null);
   const [streamingOutput, setStreamingOutput] = React.useState("");
-  const [history, setHistory] = React.useState<{ prompt: string; id: string }[]>([]);
+  const [history, setHistory] = useLocalStorage<{ prompt: string; id: string }[]>("playground-history", []);
   const cancelRef = React.useRef(false);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
@@ -219,6 +220,16 @@ export default function PlaygroundPage() {
                 <p className="text-xs text-muted-foreground">No requests yet. Try typing a prompt!</p>
               ) : (
                 <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-muted-foreground">Showing 10 most recent requests</p>
+                    <button
+                      onClick={() => setHistory([])}
+                      className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Clear
+                    </button>
+                  </div>
                   {history.map((item) => (
                     <button
                       key={item.id}

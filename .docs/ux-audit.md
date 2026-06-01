@@ -345,6 +345,9 @@ export function useSystemHealth(refreshMs = 5000) {
 
 ---
 
+
+
+    
 ### P020 — Middleware de autenticação mock não protege rotas novas
 
 **Problema:** O middleware checa cookie `session`, mas as rotas `/gateway/*` e `/agents` podem não estar no matcher explicitamente (depende do padrão de path).

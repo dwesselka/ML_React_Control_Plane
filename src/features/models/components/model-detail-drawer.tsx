@@ -18,6 +18,7 @@ import {
   Tag,
   ChevronRight,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { ModelRegistryEntry, ModelRegistryVersion, ModelDeployment } from "../types";
 
 const statusConfig: Record<string, { variant: "success" | "warning" | "secondary" | "destructive"; label: string }> = {
@@ -183,6 +184,69 @@ export function ModelDetailDrawer({ model, onClose }: ModelDetailDrawerProps) {
             <span className="text-xs text-muted-foreground">{model.framework}</span>
             <ChevronRight className="h-3 w-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">{model.task}</span>
+          </div>
+
+          {/* Lifecycle Pipeline */}
+          <div>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+              Lifecycle Pipeline
+            </p>
+            <div className="flex items-center gap-0">
+              {["development", "staging", "production", "deprecated", "archived"].map((stage, i, arr) => {
+                const isActive =
+                  (stage === "development" && model.deployments.some((d) => d.environment === "development")) ||
+                  (stage === "staging" && model.deployments.some((d) => d.environment === "staging")) ||
+                  (stage === "production" && model.deployments.some((d) => d.environment === "production")) ||
+                  (stage === "deprecated" && (model.status === "inactive" || model.status === "archived")) ||
+                  (stage === "archived" && model.status === "archived");
+                const colors: Record<string, string> = {
+                  development: "bg-blue-500 border-blue-500",
+                  staging: "bg-amber-500 border-amber-500",
+                  production: "bg-green-500 border-green-500",
+                  deprecated: "bg-orange-500 border-orange-500",
+                  archived: "bg-gray-500 border-gray-500",
+                };
+                const labels: Record<string, string> = {
+                  development: "DEV",
+                  staging: "STG",
+                  production: "PROD",
+                  deprecated: "DEP",
+                  archived: "ARC",
+                };
+                return (
+                  <React.Fragment key={stage}>
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={cn(
+                          "h-5 w-5 rounded-full border-2 flex items-center justify-center text-[8px] font-bold text-white",
+                          isActive ? colors[stage] : "bg-muted border-muted-foreground/30 text-muted-foreground/50",
+                        )}
+                      >
+                        {isActive ? "✓" : ""}
+                      </div>
+                      <span className={cn(
+                        "text-[9px] mt-1",
+                        isActive ? "text-foreground font-medium" : "text-muted-foreground/50",
+                      )}>
+                        {labels[stage]}
+                      </span>
+                    </div>
+                    {i < arr.length - 1 && (
+                      <div className={cn(
+                        "flex-1 h-px mx-1 mt-[-1.25rem]",
+                        isActive || arr.slice(0, i + 1).some((s) =>
+                          s === "development" && model.deployments.some((d) => d.environment === "development") ||
+                          s === "staging" && model.deployments.some((d) => d.environment === "staging") ||
+                          s === "production" && model.deployments.some((d) => d.environment === "production") ||
+                          s === "deprecated" && (model.status === "inactive" || model.status === "archived") ||
+                          s === "archived" && model.status === "archived"
+                        ) ? "bg-primary" : "bg-border"
+                      )} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
           </div>
 
           {/* Description */}

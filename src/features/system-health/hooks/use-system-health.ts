@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { SystemHealthData } from "../types";
 import { mockSystemHealthData } from "../mocks";
 
-function generateSimulatedData(base: SystemHealthData): SystemHealthData {
+function generateSimulatedData(): SystemHealthData {
   return {
-    kpis: base.kpis.map((kpi) => ({
+    kpis: mockSystemHealthData.kpis.map((kpi) => ({
       ...kpi,
       value: kpi.label === "Avg Latency"
         ? `${Math.round(25 + Math.random() * 10)}ms`
@@ -21,7 +21,7 @@ function generateSimulatedData(base: SystemHealthData): SystemHealthData {
                 : kpi.value,
       history: [...kpi.history.slice(1), Math.round(20 + Math.random() * 10)],
     })),
-    providers: base.providers.map((p) => ({
+    providers: mockSystemHealthData.providers.map((p) => ({
       ...p,
       latency: Math.round(p.latency + (Math.random() - 0.5) * 40),
       throughput: Math.round(p.throughput + (Math.random() - 0.5) * 100),
@@ -29,23 +29,21 @@ function generateSimulatedData(base: SystemHealthData): SystemHealthData {
       errorRate: Math.max(0, +(p.errorRate + (Math.random() - 0.5) * 0.1).toFixed(2)),
       history: [...p.history.slice(1), Math.round(p.latency + (Math.random() - 0.5) * 40)],
     })),
-    infrastructure: base.infrastructure.map((inf) => ({
+    infrastructure: mockSystemHealthData.infrastructure.map((inf) => ({
       ...inf,
       usage: Math.min(100, Math.max(0, inf.usage + Math.round((Math.random() - 0.5) * 6))),
     })),
-    activity: base.activity,
+    activity: mockSystemHealthData.activity,
   };
 }
 
 export function useSystemHealth(refreshMs = 5000) {
-  const [data, setData] = React.useState<SystemHealthData>(mockSystemHealthData);
+  const { data, isLoading } = useQuery({
+    queryKey: ["system-health"],
+    queryFn: generateSimulatedData,
+    refetchInterval: refreshMs,
+    initialData: mockSystemHealthData,
+  });
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setData((prev) => generateSimulatedData(prev));
-    }, refreshMs);
-    return () => clearInterval(interval);
-  }, [refreshMs]);
-
-  return { data };
+  return { data: data!, isLoading };
 }

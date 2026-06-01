@@ -1,18 +1,18 @@
 "use client";
 
-import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { ProviderHealthData } from "../types";
 import { mockProviderHealthData } from "../mocks";
 
-function simulateProviderData(data: ProviderHealthData): ProviderHealthData {
+function simulateProviderData(): ProviderHealthData {
   return {
-    ...data,
+    ...mockProviderHealthData,
     summary: {
-      ...data.summary,
-      avgLatency: Math.round(data.summary.avgLatency + (Math.random() - 0.5) * 20),
-      totalRequests: data.summary.totalRequests + Math.round(Math.random() * 50),
+      ...mockProviderHealthData.summary,
+      avgLatency: Math.round(mockProviderHealthData.summary.avgLatency + (Math.random() - 0.5) * 20),
+      totalRequests: mockProviderHealthData.summary.totalRequests + Math.round(Math.random() * 50),
     },
-    providers: data.providers.map((p) => ({
+    providers: mockProviderHealthData.providers.map((p) => ({
       ...p,
       requestsPerMin: Math.round(p.requestsPerMin + (Math.random() - 0.5) * 80),
       avgLatency: Math.round(p.avgLatency + (Math.random() - 0.5) * 30),
@@ -25,14 +25,12 @@ function simulateProviderData(data: ProviderHealthData): ProviderHealthData {
 }
 
 export function useProviderHealth(refreshMs = 4000) {
-  const [data, setData] = React.useState<ProviderHealthData>(mockProviderHealthData);
+  const { data, isLoading } = useQuery({
+    queryKey: ["provider-health"],
+    queryFn: simulateProviderData,
+    refetchInterval: refreshMs,
+    initialData: mockProviderHealthData,
+  });
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setData((prev) => simulateProviderData(prev));
-    }, refreshMs);
-    return () => clearInterval(interval);
-  }, [refreshMs]);
-
-  return { data };
+  return { data: data!, isLoading };
 }

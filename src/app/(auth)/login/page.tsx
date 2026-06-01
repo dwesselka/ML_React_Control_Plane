@@ -162,18 +162,36 @@ function AnimatedCounter({ value, label }: { value: string; label: string }) {
   );
 }
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [errors, setErrors] = React.useState<{ email?: string; password?: string; form?: string }>({});
   const tagline = useTypewriter(taglines);
+
+  const validate = React.useCallback(() => {
+    const next: typeof errors = {};
+    if (!emailRegex.test(email)) next.email = "Invalid email format";
+    if (password.length < 6) next.password = "Password must be at least 6 characters";
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  }, [email, password]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
+    setErrors({});
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (email !== "admin@mlcp.io" || password !== "admin123") {
+      setErrors({ form: "Invalid email or password. Try admin@mlcp.io / admin123" });
+      setLoading(false);
+      return;
+    }
     document.cookie = "session=mock-session-token; path=/; max-age=86400";
     setLoading(false);
     router.push("/dashboard");
@@ -247,7 +265,7 @@ export default function LoginPage() {
               <p className="text-sm text-muted-foreground">Sign in to your account</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -257,10 +275,12 @@ export default function LoginPage() {
                   type="email"
                   placeholder="name@company.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
+                  onBlur={validate}
                   className="w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring backdrop-blur-sm transition-shadow"
+                  aria-invalid={!!errors.email}
                 />
+                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
@@ -273,9 +293,10 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                    onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                    onBlur={validate}
                     className="w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring backdrop-blur-sm transition-shadow"
+                    aria-invalid={!!errors.password}
                   />
                   <button
                     type="button"
@@ -285,6 +306,7 @@ export default function LoginPage() {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
               </div>
 
               <div className="flex items-center justify-between">
@@ -296,6 +318,12 @@ export default function LoginPage() {
                   Forgot password?
                 </button>
               </div>
+
+              {errors.form && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
+                  <p className="text-xs text-destructive">{errors.form}</p>
+                </div>
+              )}
 
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Signing in..." : "Sign in"}

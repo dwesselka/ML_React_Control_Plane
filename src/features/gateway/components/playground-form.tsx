@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Send, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { RouterStrategy } from "../types";
 
 interface PlaygroundFormProps {
@@ -49,29 +51,26 @@ export function PlaygroundForm({ onSimulate, loading }: PlaygroundFormProps) {
         <label className="text-sm font-medium">Routing Strategy</label>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {strategies.map((s) => (
-            <button
+            <Button
               key={s.value}
               type="button"
+              variant={strategy === s.value ? "default" : "outline"}
               onClick={() => setStrategy(s.value)}
-              className={`rounded-lg border p-3 text-left transition-all ${
-                strategy === s.value
-                  ? "border-primary bg-primary/5 ring-1 ring-primary"
-                  : "bg-card hover:border-primary/30"
-              }`}
+              className={cn("h-auto p-3 text-left items-start flex-col", strategy !== s.value && "bg-card hover:border-primary/30")}
             >
               <div className="text-xs font-medium">{s.label}</div>
-              <div className="mt-0.5 text-[10px] text-muted-foreground leading-relaxed">
+              <div className="mt-0.5 text-[10px] text-muted-foreground leading-relaxed font-normal">
                 {s.description}
               </div>
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
-      <button
+      <Button
         type="submit"
         disabled={!prompt.trim() || loading}
-        className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+        className="gap-2"
       >
         {loading ? (
           <>
@@ -84,7 +83,7 @@ export function PlaygroundForm({ onSimulate, loading }: PlaygroundFormProps) {
             Send Request
           </>
         )}
-      </button>
+      </Button>
     </form>
   );
 }

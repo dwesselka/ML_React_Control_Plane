@@ -16,7 +16,10 @@ import {
   Activity,
   Pause,
   Play,
+  BarChart3,
+  Gauge,
 } from "lucide-react";
+import { SystemMetricsPanel, ProviderLatencyChart } from "@/features/monitoring";
 
 export default function ObservabilityPage() {
   const { events, paused, setPaused, acknowledge, acknowledgeAll, latestRef } =
@@ -95,6 +98,35 @@ export default function ObservabilityPage() {
         </DashboardHeader>
 
         <EventSummaryBar summary={visibleSummary} />
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold">System Metrics</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Latency and throughput over time</p>
+            <SystemMetricsPanel height={200} />
+          </div>
+          <div className="rounded-xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <Gauge className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold">Provider Latency</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Average response time by provider</p>
+            <ProviderLatencyChart
+              data={[
+                { name: "OpenAI", latency: 145, status: "healthy" },
+                { name: "Anthropic", latency: 320, status: "degraded" },
+                { name: "Google", latency: 98, status: "healthy" },
+                { name: "Meta", latency: 210, status: "healthy" },
+                { name: "Mistral", latency: 580, status: "down" },
+                { name: "DeepSeek", latency: 165, status: "healthy" },
+              ]}
+              height={200}
+            />
+          </div>
+        </div>
 
         <div className="grid gap-6 xl:grid-cols-4">
           {/* Filters sidebar */}
